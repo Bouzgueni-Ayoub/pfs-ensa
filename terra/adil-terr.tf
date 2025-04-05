@@ -113,7 +113,7 @@ resource "aws_instance" "adil-server" {
                 sudo apt install apache2 -y
                 sudo systemctl start apache2
                 sudo systemctl enable apache2
-                sudo bash -c 'echo welcome to Ubuntu server made by Adil > /var/www/html/index.html' 
+                echo "<h1>It works!</h1>" | sudo tee /var/www/html/index.html
                 EOF
             tags = {
                 Name = "Web-Server"
