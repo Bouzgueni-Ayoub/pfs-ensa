@@ -38,7 +38,7 @@ resource "aws_route_table" "route-table" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block = "10.0.1.0/24"
+    cidr_block = "0.0.0.0/0"  # Default route to the internet
     gateway_id = aws_internet_gateway.gw.id
   }
 
@@ -107,7 +107,10 @@ resource "aws_eip" "eip" {
   domain                    = "vpc"
   network_interface         = aws_network_interface.network-interface.id
   associate_with_private_ip = "10.0.1.50"
+
+  depends_on = [aws_network_interface.network-interface]
 }
+
 
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -128,6 +131,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
+  key_name      = "main-key"  # Replace with the name of your existing key pair
   user_data = <<-EOF
               #!/bin/bash
               sudo apt-get update -y
