@@ -103,8 +103,46 @@ resource "aws_network_interface" "network-interface" {
 
 # Creating an elastic ip adress 
 
-resource "aws_eip" "one" {
+resource "aws_eip" "eip" {
   domain                    = "vpc"
   network_interface         = aws_network_interface.network-interface.id
   associate_with_private_ip = "10.0.1.50"
+}
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+resource "aws_instance" "web" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t2.micro"
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo apt-get update -y
+              sudo apt-get install apache2 -y
+              sudo systemctl enable apache2
+              sudo systemctl start apache2
+              EOF
+  tags = {
+    Name = "HelloWorld"
+  }
+  network_interface {
+    network_interface_id = aws_network_interface.network-interface.id
+    device_index         = 0
+  }
+}
+output "instance_public_ip" {
+  value = aws_instance.web.public_ip
 }
