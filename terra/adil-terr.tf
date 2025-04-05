@@ -23,7 +23,7 @@ resource "aws_route_table" "adil-VPC-route" {
   vpc_id = aws_vpc.adil-vpc.id
 
   route {
-    cidr_block = "0.0.0.0/24"
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.adil-VPC-gateway.id
   }
 
@@ -112,7 +112,7 @@ resource "aws_instance" "adil-server" {
                 sudo apt update -y
                 sudo apt install apache2 -y
                 sudo systemctl start apache2
-                sudo bash -c 'echo welcome to Ubuntu server made by Adil > var/www/html/index.html' 
+                sudo bash -c 'echo welcome to Ubuntu server made by Adil > /var/www/html/index.html' 
                 EOF
             tags = {
                 Name = "Web-Server"
