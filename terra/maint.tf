@@ -11,21 +11,19 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
-# VPC Module
+
 module "vpc" {
   source = "./modules/vpc"
-  # Pass variables from the root to the module
-
+  # other inputs if any
 }
 
-# Security Group Module
 module "security_groups" {
   source = "./modules/security_groups"
-
+  # other inputs if any
 }
 
-# EC2 Module
 module "ec2" {
-  source = "./modules/ec2"
-  
+  source            = "./modules/ec2"
+  subnet_id         = module.vpc.subnet_id
+  security_group_id = module.security_groups.allow_wireguard_and_ssh_id
 }
