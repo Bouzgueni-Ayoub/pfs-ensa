@@ -1,7 +1,7 @@
 resource "aws_security_group" "allow_wireguard_and_ssh" {
   name        = "allow_wireguard_and_ssh"
   description = "Allow WireGuard VPN and SSH access"
-
+  vpc_id      = var.vpc_id
   # Ingress rules
   ingress {
     from_port   = 22
