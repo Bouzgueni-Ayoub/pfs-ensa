@@ -14,15 +14,30 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-resource "aws_instance" "wiregueard_server" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  key_name = "main-key"
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [var.security_group_id]
+# Create the ENI
+resource "aws_network_interface" "eni" {
+  subnet_id       = var.subnet_id
+  security_groups = [var.security_group_id]
+}
 
+# Create and associate EIP to ENI
+resource "aws_eip" "eip" {
+  domain             = "vpc"
+  network_interface  = aws_network_interface.eni.id
+}
+
+# Launch the EC2 instance and attach the ENI as its primary network interface
+resource "aws_instance" "wireguard_server" {
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = "t2.micro"
+  key_name               = "main-key"
+
+  network_interface {
+    device_index         = 0
+    network_interface_id = aws_network_interface.eni.id
+  }
 
   tags = {
-    Name = "ec2 instance "
+    Name = "wireguard-server"
   }
 }
