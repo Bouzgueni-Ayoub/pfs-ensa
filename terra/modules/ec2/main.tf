@@ -41,3 +41,14 @@ resource "aws_instance" "wireguard_server" {
     Name = "wireguard-server"
   }
 }
+data "aws_subnet" "selected" {
+  id = var.subnet_id
+}
+resource "aws_ebs_volume" "wireguard_data" {
+  availability_zone = data.aws_subnet.selected.availability_zone
+  size              = 1
+  type              = "gp2"
+  tags = {
+    Name = "wireguard-config"
+  }
+}

@@ -1,3 +1,3 @@
-output "instance_public_ip" {
-  value = aws_instance.wireguard_server.public_ip
+output "wireguard_instance_ip" {
+  value = module.ec2.aws_eip.eip.public_ip
 }
