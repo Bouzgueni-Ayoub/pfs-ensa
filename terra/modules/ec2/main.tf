@@ -37,10 +37,17 @@ resource "aws_instance" "wireguard_server" {
     network_interface_id = aws_network_interface.eni.id
   }
   iam_instance_profile    = var.iam_instance_profile
+  user_data = <<-EOF
+              #!/bin/bash
+              apt update -y
+              apt install -y curl unzip
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              sudo ./aws/install
+              rm -rf awscliv2.zip aws/
+              EOF
+  
   tags = {
     Name = "wireguard-server"
   }
-}
-data "aws_subnet" "selected" {
-  id = var.subnet_id
 }
