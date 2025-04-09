@@ -5,3 +5,6 @@ variable "subnet_id" {
 variable "security_group_id" {
   type = string
 }
+variable "iam_instance_profile" {
+  type = string
+}

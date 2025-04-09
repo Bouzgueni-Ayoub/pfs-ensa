@@ -27,4 +27,12 @@ module "ec2" {
   source            = "./modules/ec2"
   subnet_id         = module.vpc.subnet_id
   security_group_id = module.security_groups.allow_wireguard_and_ssh_id
+  iam_instance_profile = module.iam.iam_instance_profile
+}
+module "s3" {
+  source = "./modules/s3"
+}
+module "iam" {
+  source = "./modules/iam"
+  s3_bucket_arn = module.s3.wireguard_configs_arn
 }

@@ -36,19 +36,11 @@ resource "aws_instance" "wireguard_server" {
     device_index         = 0
     network_interface_id = aws_network_interface.eni.id
   }
-
+  iam_instance_profile    = var.iam_instance_profile
   tags = {
     Name = "wireguard-server"
   }
 }
 data "aws_subnet" "selected" {
   id = var.subnet_id
-}
-resource "aws_ebs_volume" "wireguard_data" {
-  availability_zone = data.aws_subnet.selected.availability_zone
-  size              = 1
-  type              = "gp2"
-  tags = {
-    Name = "wireguard-config"
-  }
 }
