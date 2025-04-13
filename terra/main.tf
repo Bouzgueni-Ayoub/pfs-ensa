@@ -34,6 +34,7 @@ module "s3" {
 }
 module "iam" {
   source = "./modules/iam"
-  s3_bucket_arn = module.s3.wireguard_configs_arn
+  s3_bucket_arn_wireguard = module.s3.wireguard_configs_arn
+  s3_bucket_arn_ansible_files = module.s3.ansible_files
 }
 

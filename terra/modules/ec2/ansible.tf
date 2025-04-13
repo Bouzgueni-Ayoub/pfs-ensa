@@ -31,20 +31,3 @@ resource "aws_instance" "ansible_controller" {
   }
 }
 
-resource "null_resource" "copy_ansible_files" {
-  depends_on = [aws_instance.ansible_controller]
-
-  connection {
-    type        = "ssh"
-    host        = aws_instance.ansible_controller.public_ip
-    user        = "ubuntu"
-    private_key = file("${path.module}/../../main-key.pem")
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /tmp/ansible",
-      "rsync -avz -e 'ssh -o StrictHostKeyChecking=no' ${path.module}/ansible/ ubuntu@${aws_instance.ansible_controller.public_ip}:/tmp/ansible"
-    ]
-  }
-}

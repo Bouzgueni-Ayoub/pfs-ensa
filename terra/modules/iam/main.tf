@@ -30,7 +30,26 @@ resource "aws_iam_policy" "s3_access_policy" {
           "s3:GetObject",
           "s3:DeleteObject"
         ],
-        Resource = "${var.s3_bucket_arn}/*"
+        Resource = "${var.s3_bucket_arn_wireguard}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "s3_access_policy_ansible" {
+  name = "AnsiblePolicy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ],
+        Resource = "${var.s3_bucket_arn_ansible_files}/*"
       }
     ]
   })
@@ -39,6 +58,10 @@ resource "aws_iam_policy" "s3_access_policy" {
 resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.s3_access_policy.arn
+}
+resource "aws_iam_role_policy_attachment" "attach_s3_policy_ansible" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.s3_access_policy_ansible.arn
 }
 
 resource "aws_iam_policy" "cloudwatch_logs_policy" {
