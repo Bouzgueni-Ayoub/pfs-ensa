@@ -36,3 +36,4 @@ module "iam" {
   source = "./modules/iam"
   s3_bucket_arn = module.s3.wireguard_configs_arn
 }
+
