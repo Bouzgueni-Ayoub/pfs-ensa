@@ -14,9 +14,8 @@ unzip awscliv2.zip
 # Install Ansible
 add-apt-repository --yes --update ppa:ansible/ansible
 apt install -y ansible
-mkdir -p /home/ubuntu/ansible
-cp /tmp/ansible/* /home/ubuntu/ansible/
-chown -R ubuntu:ubuntu /home/ubuntu/ansible
+
+
 
 # Install CloudWatch Agent
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
@@ -73,6 +72,9 @@ fi
 
 echo "📥 Syncing Ansible files from bucket..."
 aws s3 sync s3://$BUCKET_NAME /home/ubuntu/ansible
+
+
+chown -R ubuntu:ubuntu /home/ubuntu/ansible
 
 
 # Optional: make scripts or playbooks executable
