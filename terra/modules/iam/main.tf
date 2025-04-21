@@ -51,7 +51,7 @@ resource "aws_iam_policy" "s3_access_policy_ansible" {
   })
 }
 resource "aws_iam_policy" "s3_list_buckets" {
-  name = "AnsiblePolicy"
+  name = "S3ListPolicy"
 
   policy = jsonencode({
     Version = "2012-10-17",
