@@ -50,25 +50,30 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 # Check if AWS CLI is installed
 aws --version
 
-# Find the bucket name by tag value "Ansible files"
-BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[].Name" --output text | tr '\t' '\n' | while read bucket; do
-  TAGS=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet" --output json 2>/dev/null)
-  echo "$TAGS" | jq -e '.[] | select(.Key=="Name" and .Value=="Ansible files")' >/dev/null && echo "$bucket" && break
-done)
+#!/bin/bash
 
-# Exit if no bucket found
+echo "🔍 Searching for S3 bucket tagged as 'Ansible files'..."
+
+for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); do
+  # Try to get tags for the bucket
+  tags=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet" --output json 2>/dev/null)
+
+  # If tags exist and include our desired tag
+  if echo "$tags" | jq -e '.[] | select(.Key=="Name" and .Value=="Ansible files")' >/dev/null; then
+    BUCKET_NAME=$bucket
+    echo "✅ Found bucket: $BUCKET_NAME"
+    break
+  fi
+done
+
 if [ -z "$BUCKET_NAME" ]; then
-  echo "No bucket found with tag 'Ansible files'" >&2
+  echo "❌ No matching bucket found. Exiting."
   exit 1
 fi
 
-echo "Found bucket: $BUCKET_NAME"
+echo "📥 Syncing Ansible files from bucket..."
+aws s3 sync s3://$BUCKET_NAME /home/ubuntu/ansible
 
-# Create target folder
-mkdir -p /opt/ansible
-
-# Sync contents from the bucket to the folder
-aws s3 sync "s3://$BUCKET_NAME/ansible" /opt/ansible
 
 # Optional: make scripts or playbooks executable
 chmod +x /opt/ansible/*.yml
