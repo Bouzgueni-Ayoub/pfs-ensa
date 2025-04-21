@@ -71,10 +71,10 @@ if [ -z "$BUCKET_NAME" ]; then
 fi
 
 echo "📥 Syncing Ansible files from bucket..."
-aws s3 sync s3://$BUCKET_NAME /home/ubuntu/ansible
+aws s3 sync s3://$BUCKET_NAME /home/ubuntu
 
 
-chown -R ubuntu:ubuntu /home/ubuntu/ansible
+chown -R ubuntu:ubuntu /home/ubuntu
 
 
 # Optional: make scripts or playbooks executable
