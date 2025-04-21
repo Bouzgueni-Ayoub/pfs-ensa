@@ -36,7 +36,7 @@ resource "aws_instance" "wireguard_server" {
     device_index         = 0
     network_interface_id = aws_network_interface.eni.id
   }
-  iam_instance_profile    = var.iam_instance_profile
+  iam_instance_profile    = var.wireguard_profile
   user_data = file("${path.module}/cloud-init.sh")
   
   tags = {

@@ -21,8 +21,7 @@ resource "aws_instance" "ansible_controller" {
     network_interface_id = aws_network_interface.eni_ansible.id
   }
 
-  iam_instance_profile = var.iam_instance_profile
-
+  iam_instance_profile = var.ansible_profile
   # Install Ansible with user_data
   user_data = file("${path.module}/ansible-userdata.sh")
 

@@ -27,7 +27,8 @@ module "ec2" {
   source            = "./modules/ec2"
   subnet_id         = module.vpc.subnet_id
   security_group_id = module.security_groups.allow_wireguard_and_ssh_id
-  iam_instance_profile = module.iam.iam_instance_profile
+  wireguard_profile = module.iam.wireguard_profile
+  ansible_profile   = module.iam.ansible_profile
 }
 module "s3" {
   source = "./modules/s3"

@@ -5,6 +5,9 @@ variable "subnet_id" {
 variable "security_group_id" {
   type = string
 }
-variable "iam_instance_profile" {
+variable "wireguard_profile" {
+  type = string
+}
+variable "ansible_profile" {
   type = string
 }

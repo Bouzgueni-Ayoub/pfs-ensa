@@ -81,10 +81,10 @@ chown -R ubuntu:ubuntu /home/ubuntu
 chmod +x /opt/ansible/*.yml
 
 # Replace with the name tag of your WireGuard EC2 instance
-INSTANCE_NAME="wireguard-server" 
+env INSTANCE_NAME="wireguard-server" 
 
 # Get the public IP of the EC2 instance by its Name tag
-WIREGUARD_IP=$(aws ec2 describe-instances \
+env WIREGUARD_IP=$(aws ec2 describe-instances \
   --filters "Name=tag:Name,Values=$INSTANCE_NAME" \
   --query "Reservations[0].Instances[0].PublicIpAddress" \
   --output text)
