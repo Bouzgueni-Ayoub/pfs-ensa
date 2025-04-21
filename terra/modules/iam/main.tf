@@ -50,7 +50,22 @@ resource "aws_iam_policy" "s3_access_policy_ansible" {
     ]
   })
 }
+resource "aws_iam_policy" "s3_list_buckets" {
+  name = "AnsiblePolicy"
 
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:*"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
 resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.s3_access_policy.arn
@@ -59,7 +74,10 @@ resource "aws_iam_role_policy_attachment" "attach_s3_policy_ansible" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.s3_access_policy_ansible.arn
 }
-
+resource "aws_iam_role_policy_attachment" "attach_s3_list_bucket" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.s3_list_buckets.arn
+}
 resource "aws_iam_policy" "cloudwatch_logs_policy" {
   name = "AllowEC2CloudWatchLogging"
 
