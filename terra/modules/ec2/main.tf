@@ -23,7 +23,7 @@ resource "aws_instance" "wireguard_server" {
   associate_public_ip_address = true
   iam_instance_profile        = var.wireguard_profile
   user_data                   = file("${path.module}/cloud-init.sh")
-
+  private_ip = "10.0.1.100"
   vpc_security_group_ids = [var.security_group_id]
 
   tags = {
