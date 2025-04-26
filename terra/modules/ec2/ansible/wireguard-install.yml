@@ -8,9 +8,11 @@
       apt:
         update_cache: yes
 
-    - name: Install WireGuard
+    - name: Install WireGuard and dependencies
       apt:
-        name: wireguard
+        name:
+          - wireguard
+          - wireguard-tools
         state: present
 
     - name: Ensure /etc/wireguard directory exists
@@ -46,7 +48,7 @@
         wireguard_private_key: "{{ existing_private_key.content | b64decode }}"
 
     - name: Generate WireGuard public key
-      command: echo "{{ wireguard_private_key }}" | wg pubkey
+      shell: echo "{{ wireguard_private_key }}" | wg pubkey
       register: wg_public_key
       changed_when: false
 

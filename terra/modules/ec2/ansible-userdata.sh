@@ -99,3 +99,5 @@ done
 if [ ! -f /home/ubuntu/ansible/main-key.pem ]; then
   echo "❌ main-key.pem not found after waiting. Skipping chmod."
 fi
+cd /home/ubuntu/ansible
+ansible-playbook -i inventory.ini wireguard-install.yml -u ubuntu
