@@ -18,6 +18,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_network_interface" "eni" {
   subnet_id       = var.subnet_id
   security_groups = [var.security_group_id]
+  private_ips     = ["10.0.1.100"]
 }
 
 # Create and associate EIP to ENI

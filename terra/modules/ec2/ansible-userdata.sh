@@ -80,20 +80,3 @@ chown -R ubuntu:ubuntu /home/ubuntu
 # Optional: make scripts or playbooks executable
 chmod +x /opt/ansible/*.yml
 
-echo "🌐 Getting WireGuard server public IP..."
-
-export WIREGUARD_IP=$(aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=wireguard-server" \
-  --query "Reservations[0].Instances[0].PublicIpAddress" \
-  --output text)
-
-if [[ -z "$WIREGUARD_IP" || "$WIREGUARD_IP" == "None" ]]; then
-  echo "❌ Failed to find public IP for instance with Name tag: wireguard-server"
-  exit 1
-fi
-
-echo "✅ WireGuard IP found: $WIREGUARD_IP"
-
-# Write the IP to the variables.yml file
-echo "📄 Writing to /ansible/variables.yml"
-echo "wireguard_ip: $WIREGUARD_IP" > /ansible/variables.yml
