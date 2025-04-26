@@ -84,7 +84,10 @@ chmod +x /opt/ansible/*.yml
 for i in {1..10}; do
   if [ -f /home/ubuntu/ansible/main-key.pem ]; then
     echo "✅ Found main-key.pem, setting permissions..."
-    chmod 400 /home/ubuntu/ansible/main-key.pem
+    mv /home/ubuntu/ansible/main-key.pem /home/ubuntu/.ssh/
+    chown ubuntu:ubuntu /home/ubuntu/.ssh/main-key.pem
+    chmod 600 /home/ubuntu/.ssh/main-key.pem
+
     break
   else
     echo "⏳ main-key.pem not found yet, retrying in 5 seconds..."
