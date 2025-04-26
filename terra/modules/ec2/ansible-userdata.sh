@@ -77,6 +77,19 @@ aws s3 sync s3://$BUCKET_NAME /home/ubuntu
 chown -R ubuntu:ubuntu /home/ubuntu
 
 
-# Optional: make scripts or playbooks executable
-chmod +x /opt/ansible/*.yml
+# Wait until the main-key.pem file exists before chmod
+for i in {1..10}; do
+  if [ -f /home/ubuntu/ansible/main-key.pem ]; then
+    echo "✅ Found main-key.pem, setting permissions..."
+    chmod 400 /home/ubuntu/ansible/main-key.pem
+    break
+  else
+    echo "⏳ main-key.pem not found yet, retrying in 5 seconds..."
+    sleep 5
+  fi
+done
 
+# Final check if after all retries the file still doesn't exist
+if [ ! -f /home/ubuntu/ansible/main-key.pem ]; then
+  echo "❌ main-key.pem not found after waiting. Skipping chmod."
+fi
