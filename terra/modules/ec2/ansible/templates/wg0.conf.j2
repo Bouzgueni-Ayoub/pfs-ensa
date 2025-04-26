@@ -2,11 +2,16 @@
 PrivateKey = {{ wireguard_private_key }}
 Address = 10.0.0.1/24
 ListenPort = 51820
-SaveConfig = true
+#SaveConfig = true
 
 # Server Public Key (for reference)
-# PublicKey = {{ wg_public_key.stdout }}
+# PublicKey = s6jc9QOknUostbWcM+oaIGujYi1vlfug4eP0ywTCMS8=
 
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
 
+[Peer]
+# Client Peer
+PublicKey = YqMA/PeLPaYBuXybO0mEfOHU34oFtoUDDV0nlIAHamw=
+AllowedIPs = 10.0.0.2/32
+PersistentKeepalive = 25
