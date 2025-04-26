@@ -14,33 +14,25 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-# Create the ENI
-resource "aws_network_interface" "eni" {
-  subnet_id       = var.subnet_id
-  security_groups = [var.security_group_id]
-  private_ips     = ["10.0.1.100"]
-  source_dest_check = false
-}
-
-# Create and associate EIP to ENI
-resource "aws_eip" "eip" {
-  domain             = "vpc"
-  network_interface  = aws_network_interface.eni.id
-}
-
-# Launch the EC2 instance and attach the ENI as its primary network interface
+# Launch the EC2 instance normally (no manual ENI)
 resource "aws_instance" "wireguard_server" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t2.micro"
-  key_name               = "main-key"
-  network_interface {
-    device_index         = 0
-    network_interface_id = aws_network_interface.eni.id
-  }
-  iam_instance_profile    = var.wireguard_profile
-  user_data = file("${path.module}/cloud-init.sh")
-  
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = "t2.micro"
+  key_name                    = "main-key"
+  subnet_id                   = var.subnet_id
+  associate_public_ip_address = true
+  iam_instance_profile        = var.wireguard_profile
+  user_data                   = file("${path.module}/cloud-init.sh")
+
+  vpc_security_group_ids = [var.security_group_id]
+
   tags = {
     Name = "wireguard-server"
   }
+}
+
+# Allocate and associate an EIP to the instance
+resource "aws_eip" "wireguard_eip" {
+  instance = aws_instance.wireguard_server.id
+  domain   = "vpc"
 }
