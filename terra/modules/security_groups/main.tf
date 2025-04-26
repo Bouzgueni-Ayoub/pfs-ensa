@@ -25,4 +25,14 @@ resource "aws_security_group" "allow_wireguard_and_ssh" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    description      = "Allow all ICMP IPv4"
+    from_port        = -1
+    to_port          = -1
+    protocol         = "icmp"
+    cidr_blocks      = ["0.0.0.0/0"]  # Allow from anywhere
+  }
+
 }
+

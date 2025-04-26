@@ -1,7 +1,5 @@
 - name: Install and Configure WireGuard on WireGuard EC2
-  hosts: wireguard
-  vars_files:
-    - /home/ubuntu/ansible/var.yml
+  hosts: wireguard 
   become: yes
   tasks:
     - name: Update APT cache
