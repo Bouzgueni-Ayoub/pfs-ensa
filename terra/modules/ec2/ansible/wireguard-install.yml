@@ -70,3 +70,8 @@
         name: wg-quick@wg0
         enabled: yes
         state: started
+
+    # 🔥 Fix bad DHCP route after WireGuard starts
+    - name: Delete wrong DHCP injected route for VPN client
+      command: ip route del 10.0.0.2
+      ignore_errors: yes
