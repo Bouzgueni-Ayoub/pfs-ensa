@@ -1,5 +1,7 @@
 - name: Install and Configure WireGuard on WireGuard EC2
-  hosts: wireguard 
+  hosts: wireguard
+  vars_files:
+    - /home/ubuntu/ansible/var.yml
   become: yes
   tasks:
     - name: Update APT cache
@@ -17,13 +19,34 @@
         state: directory
         mode: '0700'
 
-    - name: Generate WireGuard server private key
+    - name: Check if private key already exists
+      stat:
+        path: /etc/wireguard/privatekey
+      register: privatekey_stat
+
+    - name: Generate WireGuard server private key if not exists
       command: wg genkey
       register: wg_private_key
-      changed_when: false
+      when: not privatekey_stat.stat.exists
 
-    - name: Generate WireGuard server public key
-      command: echo "{{ wg_private_key.stdout }}" | wg pubkey
+    - name: Save WireGuard private key to file
+      copy:
+        content: "{{ wg_private_key.stdout }}"
+        dest: /etc/wireguard/privatekey
+        mode: '0600'
+      when: not privatekey_stat.stat.exists
+
+    - name: Read existing private key
+      slurp:
+        src: /etc/wireguard/privatekey
+      register: existing_private_key
+
+    - name: Decode private key
+      set_fact:
+        wireguard_private_key: "{{ existing_private_key.content | b64decode }}"
+
+    - name: Generate WireGuard public key
+      command: echo "{{ wireguard_private_key }}" | wg pubkey
       register: wg_public_key
       changed_when: false
 

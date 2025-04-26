@@ -1,8 +1,12 @@
 [Interface]
-PrivateKey = {{ wg_private_key.stdout }}
+PrivateKey = {{ wireguard_private_key }}
 Address = 10.0.0.1/24
 ListenPort = 51820
 SaveConfig = true
 
+# Server Public Key (for reference)
+# PublicKey = {{ wg_public_key.stdout }}
+
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
