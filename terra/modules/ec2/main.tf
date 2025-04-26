@@ -19,6 +19,7 @@ resource "aws_network_interface" "eni" {
   subnet_id       = var.subnet_id
   security_groups = [var.security_group_id]
   private_ips     = ["10.0.1.100"]
+  source_dest_check = false
 }
 
 # Create and associate EIP to ENI
@@ -32,7 +33,6 @@ resource "aws_instance" "wireguard_server" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
   key_name               = "main-key"
-  source_dest_check = false
   network_interface {
     device_index         = 0
     network_interface_id = aws_network_interface.eni.id
