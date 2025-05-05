@@ -31,7 +31,7 @@ resource "aws_instance" "ansible_controller" {
 }
 
 resource "local_file" "ansible_vars" {
-  filename = "${path.module}/modules/ec2/ansible/var.yml"
+   filename = "${path.module}/ansible/var.yml"
   content  = yamlencode({
     client_public_key = var.client_public_key
   })

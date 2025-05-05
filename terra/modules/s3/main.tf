@@ -58,13 +58,18 @@ resource "aws_s3_bucket_public_access_block" "ansible_files" {
   restrict_public_buckets = true
 }
 resource "aws_s3_object" "ansible_files" {
+  depends_on = [
+    aws_instance.ansible_controller,
+    local_file.ansible_vars,    # make sure var.yml exists first
+  ]
+
   for_each = {
     for file in fileset("${path.root}/modules/ec2/ansible", "**") :
     file => file
   }
 
   bucket = aws_s3_bucket.ansible_files.id
-  key    = "ansible/${each.key}"  # Keeps the file path and subdirectories intact in S3
+  key    = "ansible/${each.key}"                       # preserve subfolders
   source = "${path.root}/modules/ec2/ansible/${each.key}"
   etag   = filemd5("${path.root}/modules/ec2/ansible/${each.key}")
 }
