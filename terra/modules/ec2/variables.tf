@@ -11,3 +11,8 @@ variable "wireguard_profile" {
 variable "ansible_profile" {
   type = string
 }
+variable "client_public_key" {
+  description = "WireGuard peer (client) public key to insert into server config"
+  type        = string
+  # NO default = prompt will happen
+}

@@ -9,6 +9,6 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 
 [Peer]
 # Client Peer
-PublicKey = YqMA/PeLPaYBuXybO0mEfOHU34oFtoUDDV0nlIAHamw=
+PublicKey         = {{ client_public_key }}
 AllowedIPs = 10.0.0.2/32
 PersistentKeepalive = 25
