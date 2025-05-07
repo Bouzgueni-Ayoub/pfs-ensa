@@ -5,6 +5,6 @@ DNS        = {{ item.dns | default("8.8.8.8") }}
 
 [Peer]
 PublicKey           = {{ server_public_key }}
-Endpoint            = {{ server_endpoint }}
+Endpoint            = {{ server_endpoint }}:51820
 AllowedIPs          = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25

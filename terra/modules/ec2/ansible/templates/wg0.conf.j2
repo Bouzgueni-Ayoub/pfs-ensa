@@ -4,16 +4,12 @@ Address    = 10.0.0.1/24
 ListenPort = 51820
 # SaveConfig = true
 
-PostUp   = iptables -A FORWARD -i %i -j ACCEPT; \
-           iptables -A FORWARD -o %i -j ACCEPT; \
-           iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; \
-           iptables -D FORWARD -o %i -j ACCEPT; \
-           iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+PostUp   = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
 
 {% for c in wireguard_clients %}
 [Peer]
-PublicKey           = {{ c.client_private_key | community.crypto.wg_pubkey }}
+PublicKey           = {{ c.client_public_key }}
 AllowedIPs          = {{ c.client_ip }}/32
 PersistentKeepalive = 25
 

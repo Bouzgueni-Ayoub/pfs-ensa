@@ -11,4 +11,4 @@ tasks:
     before: 
               ./bin/aws-cli-install
   - name: chmod main key
-    command: chmod 600 /workspace/terra/main-key.pem
+    command: chmod 600 /workspace/pfs-ensa/terra/main-key.pem

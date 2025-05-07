@@ -16,6 +16,7 @@ variable "wireguard_clients" {
   type = list(object({
     name               = string
     client_private_key = string
+    client_public_key = string
     client_ip          = string
   }))
 }
