@@ -124,10 +124,4 @@
       loop: "{{ wireguard_clients }}"
       loop_control:
         label: "{{ item.name }}"
-    - name: Upload client configs to S3 bucket from env var
-      shell: |
-        aws s3 cp /home/ubuntu/ansible/clients/ s3://$BUCKET_NAME/clients/ --recursive
-      args:
-        executable: /bin/bash
-      environment:
-        WIREGUARD_S3_BUCKET: "{{ lookup('env', '$BUCKET_NAME') }}"
+
