@@ -1,0 +1,10 @@
+[Interface]
+PrivateKey = {{ item.client_private_key }}
+Address    = {{ item.client_ip }}/24
+DNS        = {{ item.dns | default("8.8.8.8") }}
+
+[Peer]
+PublicKey           = {{ server_public_key }}
+Endpoint            = {{ server_endpoint }}
+AllowedIPs          = 0.0.0.0/0, ::/0
+PersistentKeepalive = 25

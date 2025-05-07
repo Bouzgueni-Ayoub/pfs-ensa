@@ -1,28 +1,25 @@
 - name: Install and Configure WireGuard on WireGuard EC2
   hosts: wireguard
+  become: yes
   vars_files:
     - /home/ubuntu/ansible/var.yml
-  become: yes
+
+  collections:
+    - community.crypto
+
+  vars:
+    wg_iface: wg0
+    pub_if: eth0
 
   tasks:
-    - name: Update APT cache
-      apt:
-        update_cache: yes
-
-    - name: Install WireGuard and dependencies
-      apt:
-        name:
-          - wireguard
-          - wireguard-tools
-        state: present
-
-    - name: Ensure /etc/wireguard directory exists
+    #— Create the directory
+    - name: Ensure /etc/wireguard exists
       file:
         path: /etc/wireguard
         state: directory
         mode: '0700'
 
-    # ─── Always override any existing key ────────────────────────────────────────
+    #— Regenerate server key
     - name: Remove any existing server private key
       file:
         path: /etc/wireguard/privatekey
@@ -32,36 +29,30 @@
       command: wg genkey
       register: wg_private_key
 
-    - name: Save the new private key to file
+    - name: Save the new private key
       copy:
         content: "{{ wg_private_key.stdout }}"
         dest: /etc/wireguard/privatekey
         mode: '0600'
-    # ─────────────────────────────────────────────────────────────────────────────
-    - name: Render WireGuard config for each client
-      template:
-        src: templates/client.conf.j2
-        dest: "/home/ubuntu/ansible/clients/{{ item.name }}.conf"
-      loop: "{{ wireguard_clients }}"
-      vars:
-        server_endpoint: "{{ server_endpoint }}"
-    - name: Read existing private key
+
+    #— Slurp & set facts for server keys
+    - name: Load server private key
       slurp:
         src: /etc/wireguard/privatekey
-      register: existing_private_key
+      register: sk_file
 
-    - name: Decode private key
+    - name: Set server_private_key fact
       set_fact:
-        wireguard_private_key: "{{ existing_private_key.content | b64decode }}"
+        server_private_key: "{{ sk_file.content | b64decode }}"
 
-    - name: Generate WireGuard public key
-      shell: echo "{{ wireguard_private_key }}" | wg pubkey
-      register: wg_public_key
-      changed_when: false
+    - name: Compute server_public_key
+      set_fact:
+        server_public_key: "{{ server_private_key | community.crypto.wg_pubkey }}"
 
-    - name: Create WireGuard configuration file using template
+    #— Render server conf (with all client peers)
+    - name: Render /etc/wireguard/wg0.conf
       template:
-        src: wg0.conf.j2
+        src: templates/wg0.conf.j2
         dest: /etc/wireguard/wg0.conf
         mode: '0600'
 
@@ -72,12 +63,46 @@
         state: present
         reload: yes
 
-    - name: Start and enable WireGuard service
+    - name: Apply NAT and forwarding rules
+      block:
+        - iptables:
+            table: nat
+            chain: POSTROUTING
+            source: "10.0.0.0/24"
+            out_interface: "{{ pub_if }}"
+            jump: MASQUERADE
+        - iptables:
+            chain: FORWARD
+            in_interface: "{{ wg_iface }}"
+            out_interface: "{{ pub_if }}"
+            jump: ACCEPT
+        - iptables:
+            chain: FORWARD
+            in_interface: "{{ pub_if }}"
+            out_interface: "{{ wg_iface }}"
+            jump: ACCEPT
+
+    - name: Start & enable WireGuard service
       systemd:
         name: wg-quick@wg0
         enabled: yes
         state: started
-
     - name: Delete wrong DHCP injected route for VPN client
       command: ip route del 10.0.0.2
       ignore_errors: yes
+
+    #— Render individual client configs
+    - name: Ensure client configs directory exists
+      file:
+        path: /home/ubuntu/ansible/clients
+        state: directory
+        mode: '0755'
+
+    - name: Render client configs
+      template:
+        src: templates/client.conf.j2
+        dest: "/home/ubuntu/ansible/clients/{{ item.name }}.conf"
+        mode: '0600'
+      loop: "{{ wireguard_clients }}"
+      loop_control:
+        label: "{{ item.name }}"
