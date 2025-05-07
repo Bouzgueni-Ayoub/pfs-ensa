@@ -30,10 +30,5 @@ resource "aws_instance" "ansible_controller" {
   }
 }
 
-resource "local_file" "ansible_vars" {
-   filename = "${path.module}/ansible/var.yml"
-  content  = yamlencode({
-    client_public_key = var.client_public_key 
-    server_public_ip= aws_eip.wireguard_eip
-  })
-}
+
+

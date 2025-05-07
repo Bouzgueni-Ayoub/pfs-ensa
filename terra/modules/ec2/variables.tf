@@ -11,6 +11,4 @@ variable "wireguard_profile" {
 variable "ansible_profile" {
   type = string
 }
-variable "client_public_key" {
-  type = string
-}
+
