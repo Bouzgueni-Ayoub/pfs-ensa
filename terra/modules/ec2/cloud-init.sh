@@ -3,7 +3,7 @@
 # Update and install required dependencies
 apt update -y
 apt install -y unzip curl wget
-
+sudo apt install -y jq
 # Install AWS CLI v2
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
@@ -65,7 +65,9 @@ done
 for i in {1..10}; do
   if [ -d "$SRC_DIR" ] && [ "$(ls -A "$SRC_DIR")" ]; then
     echo "✅ Found client config folder, uploading to S3..."
-    sudo aws s3 cp "$SRC_DIR/" "s3://$BUCKET_NAME/clients/" --recursive
+    bucket="$BUCKET_NAME"
+    sudo aws s3 cp "$SRC_DIR/" "s3://$bucket/clients/" --recursive
+
     break
   else
     echo "⏳ Folder not ready yet, retrying in 5 seconds..."
