@@ -1,0 +1,9 @@
+server_public_key: sLSmj/gSk40I1TsZRgKWCk2lelDagFsl9bGcDx0gZBY=
+server_endpoint:  18.153.217.163:51820
+
+wireguard_clients:
+  - name: ayoub
+    client_private_key: aLUlWd63rsbjKrRzFyjJterBGxQ/rKYK3+J38znBO3c=
+    client_ip: 10.0.0.2
+    dns: 8.8.8.8             # optional, defaults to 8.8.8.8
+

@@ -29,8 +29,7 @@ module "ec2" {
   security_group_id = module.security_groups.allow_wireguard_and_ssh_id
   wireguard_profile = module.iam.wireguard_profile
   ansible_profile   = module.iam.ansible_profile
-  client_public_key = var.client_public_key
-
+  wireguard_clients = var.wireguard_clients
 }
 module "s3" {
   source = "./modules/s3"

@@ -3,6 +3,7 @@
   vars_files:
     - /home/ubuntu/ansible/var.yml
   become: yes
+
   tasks:
     - name: Update APT cache
       apt:
@@ -21,23 +22,29 @@
         state: directory
         mode: '0700'
 
-    - name: Check if private key already exists
-      stat:
+    # ─── Always override any existing key ────────────────────────────────────────
+    - name: Remove any existing server private key
+      file:
         path: /etc/wireguard/privatekey
-      register: privatekey_stat
+        state: absent
 
-    - name: Generate WireGuard server private key if not exists
+    - name: Generate new WireGuard server private key
       command: wg genkey
       register: wg_private_key
-      when: not privatekey_stat.stat.exists
 
-    - name: Save WireGuard private key to file
+    - name: Save the new private key to file
       copy:
         content: "{{ wg_private_key.stdout }}"
         dest: /etc/wireguard/privatekey
         mode: '0600'
-      when: not privatekey_stat.stat.exists
-
+    # ─────────────────────────────────────────────────────────────────────────────
+    - name: Render WireGuard config for each client
+      template:
+        src: templates/client.conf.j2
+        dest: "/home/ubuntu/ansible/clients/{{ item.name }}.conf"
+      loop: "{{ wireguard_clients }}"
+      vars:
+        server_endpoint: "{{ server_endpoint }}"
     - name: Read existing private key
       slurp:
         src: /etc/wireguard/privatekey
@@ -71,7 +78,6 @@
         enabled: yes
         state: started
 
-    # 🔥 Fix bad DHCP route after WireGuard starts
     - name: Delete wrong DHCP injected route for VPN client
       command: ip route del 10.0.0.2
       ignore_errors: yes
