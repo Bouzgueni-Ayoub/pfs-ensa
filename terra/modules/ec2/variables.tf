@@ -12,5 +12,10 @@ variable "ansible_profile" {
   type = string
 }
 variable "wireguard_clients" {
-  type = string
+  description = "List of WireGuard clients to generate configs for"
+  type = list(object({
+    name               = string
+    client_private_key = string
+    client_ip          = string
+  }))
 }

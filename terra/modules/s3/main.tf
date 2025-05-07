@@ -58,6 +58,10 @@ resource "aws_s3_bucket_public_access_block" "ansible_files" {
   restrict_public_buckets = true
 }
 resource "aws_s3_object" "ansible_files" {
+  depends_on = [
+    var.ansible_controller,
+    var.ansible_vars   # make sure var.yml exists first
+  ]
 
   for_each = {
     for file in fileset("${path.root}/modules/ec2/ansible", "**") :
