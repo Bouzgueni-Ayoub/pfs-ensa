@@ -34,8 +34,6 @@ module "ec2" {
 }
 module "s3" {
   source = "./modules/s3"
-  ansible_vars= module.ec2.ansible_vars
-  ansible_controller= module.ec2.ansible_controller
 }
 module "iam" {
   source = "./modules/iam"
