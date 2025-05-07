@@ -38,5 +38,14 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 # Start CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
 
-# Start AWS CLI to check if it's working
-aws --version
+for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); do
+  # Try to get tags for the bucket
+  tags=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet" --output json 2>/dev/null)
+
+  # If tags exist and include our desired tag
+  if echo "$tags" | jq -e '.[] | select(.Key=="Name" and .Value=="WireGuard Configs")' >/dev/null; then
+    BUCKET_NAME=$bucket
+    echo "✅ Found bucket: $BUCKET_NAME"
+    break
+  fi
+done
