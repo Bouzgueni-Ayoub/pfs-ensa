@@ -59,8 +59,8 @@ resource "aws_s3_bucket_public_access_block" "ansible_files" {
 }
 resource "aws_s3_object" "ansible_files" {
   depends_on = [
-    aws_instance.ansible_controller,
-    local_file.ansible_vars,    # make sure var.yml exists first
+    var.ansible_controller,
+    var.ansible_vars   # make sure var.yml exists first
   ]
 
   for_each = {
