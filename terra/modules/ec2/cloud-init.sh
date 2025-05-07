@@ -44,8 +44,31 @@ for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); 
 
   # If tags exist and include our desired tag
   if echo "$tags" | jq -e '.[] | select(.Key=="Name" and .Value=="WireGuard Configs")' >/dev/null; then
-    BUCKET_NAME=$bucket
+    export BUCKET_NAME=$bucket
     echo "✅ Found bucket: $BUCKET_NAME"
     break
+  fi
+done
+SRC_DIR="/home/ubuntu/ansible/clients"
+# making sure aws cli is available
+for i in {1..10}; do
+  if command -v aws >/dev/null 2>&1; then
+    echo "✅ AWS CLI is available."
+    break
+  else
+    echo "⏳ Waiting for AWS CLI to become available..."
+    sleep 5
+  fi
+done
+
+# Wait for folder and upload to S3
+for i in {1..10}; do
+  if [ -d "$SRC_DIR" ] && [ "$(ls -A "$SRC_DIR")" ]; then
+    echo "✅ Found client config folder, uploading to S3..."
+    sudo aws s3 cp "$SRC_DIR/" "s3://$BUCKET_NAME/clients/" --recursive
+    break
+  else
+    echo "⏳ Folder not ready yet, retrying in 5 seconds..."
+    sleep 5
   fi
 done
