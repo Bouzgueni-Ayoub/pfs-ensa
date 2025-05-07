@@ -36,9 +36,7 @@ resource "local_file" "ansible_vars" {
     server_endpoint   = aws_eip.wireguard_eip.public_ip
     wireguard_clients = var.wireguard_clients
   })
-  lifecycle {
-    prevent_destroy = true
-  }
+
 }
 
 
