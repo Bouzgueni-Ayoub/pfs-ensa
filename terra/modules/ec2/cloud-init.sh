@@ -49,24 +49,13 @@ for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); 
     break
   fi
 done
-SRC_DIR="/home/ubuntu/ansible/clients"
-# making sure aws cli is available
-for i in {1..10}; do
-  if command -v aws >/dev/null 2>&1; then
-    echo "✅ AWS CLI is available."
-    break
-  else
-    echo "⏳ Waiting for AWS CLI to become available..."
-    sleep 5
-  fi
-done
 
 # Wait for folder and upload to S3
 for i in {1..10}; do
-  if [ -d "$SRC_DIR" ] && [ "$(ls -A "$SRC_DIR")" ]; then
+  if [ -d "/home/ubuntu/ansible/clients/" ] && [ "$(ls -A "/home/ubuntu/ansible/clients/")" ]; then
     echo "✅ Found client config folder, uploading to S3..."
     bucket="$BUCKET_NAME"
-    sudo aws s3 cp "$SRC_DIR/" "s3://$bucket/clients/" --recursive
+    aws s3 cp "/home/ubuntu/ansible/clients/" "s3://$bucket/clients/" --recursive
 
     break
   else

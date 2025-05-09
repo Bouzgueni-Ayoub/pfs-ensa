@@ -1,0 +1,10 @@
+"server_endpoint": "3.124.129.244"
+"wireguard_clients":
+- "client_ip": "10.0.0.2"
+  "client_private_key": "aLUlWd63rsbjKrRzFyjJterBGxQ/rKYK3+J38znBO3c="
+  "client_public_key": "YqMA/PeLPaYBuXybO0mEfOHU34oFtoUDDV0nlIAHamw="
+  "name": "ayoub"
+- "client_ip": "10.0.0.3"
+  "client_private_key": "2Ij7TWnJxP1vGfCyVuKs9rWh/5Ee9rBZovG9cCPQ0nY="
+  "client_public_key": "835DDAjtZDQBNTgD7j4SaX+dq5JExDuIWZhiU505Jgk="
+  "name": "yahia"
