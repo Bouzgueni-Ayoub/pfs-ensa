@@ -1,13 +1,8 @@
-# Creating ENI for Ansible
-resource "aws_network_interface" "eni_ansible" {
-  subnet_id       = var.subnet_id
-  security_groups = [var.security_group_id]
-}
 
 # EIP for Ansible EC2
 resource "aws_eip" "eip_ansible" {
   domain            = "vpc"
-  network_interface = aws_network_interface.eni_ansible.id
+  instance = aws_instance.ansible_controller.id
 }
 
 # Ansible EC2 instance
@@ -15,13 +10,12 @@ resource "aws_instance" "ansible_controller" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
   key_name               = "main-key"
+  subnet_id                   = var.subnet_id
+  associate_public_ip_address = true
+  iam_instance_profile        = var.ansible_profile
+  private_ip = "10.0.1.200"
+  vpc_security_group_ids = [var.security_group_id]
 
-  network_interface {
-    device_index         = 0
-    network_interface_id = aws_network_interface.eni_ansible.id
-  }
-
-  iam_instance_profile = var.ansible_profile
   # Install Ansible with user_data
   user_data = file("${path.module}/ansible-userdata.sh")
 
