@@ -20,3 +20,6 @@ variable "wireguard_clients" {
     client_ip          = string
   }))
 }
+variable "wireguard_configs" {
+  type = string
+}

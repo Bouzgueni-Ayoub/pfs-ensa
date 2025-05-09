@@ -35,6 +35,7 @@ resource "local_file" "ansible_vars" {
   content  = yamlencode({
     server_endpoint   = aws_eip.wireguard_eip.public_ip
     wireguard_clients = var.wireguard_clients
+    ansible_bucket_name = var.wireguard_configs
   })
 
 }

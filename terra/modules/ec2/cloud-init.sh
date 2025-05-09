@@ -38,28 +38,28 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 # Start CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
 
-for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); do
-  # Try to get tags for the bucket
-  tags=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet" --output json 2>/dev/null)
-
-  # If tags exist and include our desired tag
-  if echo "$tags" | jq -e '.[] | select(.Key=="Name" and .Value=="WireGuard Configs")' >/dev/null; then
-    export BUCKET_NAME=$bucket
-    echo "✅ Found bucket: $BUCKET_NAME"
-    break
-  fi
-done
-
-# Wait for folder and upload to S3
-for i in {1..10}; do
-  if [ -d "/home/ubuntu/ansible/clients/" ] && [ "$(ls -A "/home/ubuntu/ansible/clients/")" ]; then
-    echo "✅ Found client config folder, uploading to S3..."
-    bucket="$BUCKET_NAME"
-    aws s3 cp "/home/ubuntu/ansible/clients/" "s3://$bucket/clients/" --recursive
-
-    break
-  else
-    echo "⏳ Folder not ready yet, retrying in 5 seconds..."
-    sleep 5
-  fi
-done
+#for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); do
+#  # Try to get tags for the bucket
+#  tags=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet" --output json 2>/dev/null)
+#
+#  # If tags exist and include our desired tag
+#  if echo "$tags" | jq -e '.[] | select(.Key=="Name" and .Value=="WireGuard Configs")' >/dev/null; then
+#    export BUCKET_NAME=$bucket
+#    echo "✅ Found bucket: $BUCKET_NAME"
+#    break
+#  fi
+#done
+#
+## Wait for folder and upload to S3
+#for i in {1..15}; do
+#  if [ -d "/home/ubuntu/ansible/clients/" ] && [ "$(ls -A "/home/ubuntu/ansible/clients/")" ]; then
+#    echo "✅ Found client config folder, uploading to S3..."
+#    bucket="$BUCKET_NAME"
+#    aws s3 cp "/home/ubuntu/ansible/clients/" "s3://$bucket/clients/" --recursive
+#
+#    break
+#  else
+#    echo "⏳ Folder not ready yet, retrying in 5 seconds..."
+#    sleep 5
+#  fi
+#done

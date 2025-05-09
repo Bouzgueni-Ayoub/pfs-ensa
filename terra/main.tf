@@ -30,12 +30,13 @@ module "ec2" {
   wireguard_profile = module.iam.wireguard_profile
   ansible_profile   = module.iam.ansible_profile
   wireguard_clients = var.wireguard_clients
+  wireguard_configs = module.s3.wireguard_configs
 }
 module "s3" {
   source = "./modules/s3"
   ansible_controller= module.ec2.ansible_controller
   ansible_vars = module.ec2.ansible_vars
-  depends_on = [ module.ec2 ]
+  
 }
 module "iam" {
   source = "./modules/iam"

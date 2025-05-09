@@ -125,3 +125,5 @@
       loop_control:
         label: "{{ item.name }}"
 
+    - name: Upload client configs to S3
+      shell: aws s3 cp /home/ubuntu/ansible/clients/ s3://{{ ansible_bucket_name }}/clients/ --recursive
