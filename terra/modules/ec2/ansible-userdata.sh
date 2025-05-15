@@ -168,3 +168,20 @@ systemctl daemon-reexec
 systemctl enable prometheus
 systemctl start prometheus
 
+
+
+
+
+#Intallation of Grafana
+
+# Add Grafana APT repo
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+
+# Add repo key
+sudo apt-get install -y gnupg2
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+
+# Update and install
+sudo apt-get update
+sudo apt-get install grafana -y
