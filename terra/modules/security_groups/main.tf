@@ -20,6 +20,14 @@ resource "aws_security_group" "allow_wireguard_and_ssh" {
   }
 
   ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  #After testing we will use our IP address
+
+  }
+
+  ingress {
     from_port   = 51820
     to_port     = 51820
     protocol    = "udp"
