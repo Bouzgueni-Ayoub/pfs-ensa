@@ -65,8 +65,10 @@ resource "aws_iam_policy" "s3_access_policy_wireguard" {
         Action = [
           "s3:*"
         ],
-        Resource = "${var.s3_bucket_arn_wireguard}/*"
-        Resource = "${var.s3_bucket_arn_wireguard}"
+        Resource = [
+          "${var.s3_bucket_arn_wireguard}",
+          "${var.s3_bucket_arn_wireguard}/*"
+        ]
       }
     ]
   })
@@ -83,8 +85,10 @@ resource "aws_iam_policy" "s3_access_policy_ansible" {
         Action = [
           "s3:*"
         ],
-        Resource = "${var.s3_bucket_arn_ansible_files}/*"
-        Resource = "${var.s3_bucket_arn_ansible_files}"
+        Resource = [
+          "${var.s3_bucket_arn_ansible_files}",
+          "${var.s3_bucket_arn_ansible_files}/*"
+        ]
       }
     ]
   })
