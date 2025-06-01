@@ -105,3 +105,12 @@ ansible-playbook -i inventory.ini wireguard-install.yml -u ubuntu
 wget https://github.com/prometheus/prometheus/releases/latest/download/prometheus-<version>.linux-amd64.tar.gz
 tar xvf prometheus-*.tar.gz
 cd prometheus-*/
+
+scrape_configs:
+  - job_name: 'wireguard-node'
+    static_configs:
+      - targets: ['10.0.1.100:9100']
+
+sudo apt install -y grafana
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
