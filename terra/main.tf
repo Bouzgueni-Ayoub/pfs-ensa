@@ -31,7 +31,7 @@ module "ec2" {
   ansible_profile   = module.iam.ansible_profile
   wireguard_clients = var.wireguard_clients
   wireguard_configs = module.s3.wireguard_configs
-}
+  }
 module "s3" {
   source = "./modules/s3"
   ansible_controller= module.ec2.ansible_controller

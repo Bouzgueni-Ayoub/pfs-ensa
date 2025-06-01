@@ -63,3 +63,9 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 #    sleep 5
 #  fi
 #done
+
+wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-<version>.linux-amd64.tar.gz
+tar xvf node_exporter-*.tar.gz
+cd node_exporter-*/
+./node_exporter &
+
