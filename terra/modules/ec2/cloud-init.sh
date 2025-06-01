@@ -78,7 +78,8 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 cd /opt
 wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-1.8.1.linux-amd64.tar.gz
 tar xvf node_exporter-1.8.1.linux-amd64.tar.gz
-mv node_exporter-1.8.1.linux-amd64/node_exporter /usr/local/bin/
+cp node_exporter-1.8.1.linux-amd64/node_exporter /usr/local/bin/
+chmod +x /usr/local/bin/node_exporter
 
 # Create systemd service file
 cat <<EOF > /etc/systemd/system/node_exporter.service
@@ -98,3 +99,8 @@ EOF
 systemctl daemon-reexec
 systemctl enable node_exporter
 systemctl start node_exporter
+
+
+# Optional: log for debug
+systemctl status node_exporter --no-pager
+curl http://localhost:9100/metrics | head -n 10
