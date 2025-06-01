@@ -1,9 +1,14 @@
 #!/bin/bash
 
+set -e
+
+
 # Update and install required dependencies
 apt update -y
 apt install -y unzip curl wget
 sudo apt install -y jq
+apt-get install -y wget tar
+
 # Install AWS CLI v2
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
@@ -64,8 +69,32 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 #  fi
 #done
 
-wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-<version>.linux-amd64.tar.gz
-tar xvf node_exporter-*.tar.gz
-cd node_exporter-*/
-./node_exporter &
 
+
+
+#Installing Node Exporter on WireGuard EC2
+
+# Download and install Node Exporter
+cd /opt
+wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-1.8.1.linux-amd64.tar.gz
+tar xvf node_exporter-1.8.1.linux-amd64.tar.gz
+mv node_exporter-1.8.1.linux-amd64/node_exporter /usr/local/bin/
+
+# Create systemd service file
+cat <<EOF > /etc/systemd/system/node_exporter.service
+[Unit]
+Description=Prometheus Node Exporter
+After=network.target
+
+[Service]
+User=nobody
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Start and enable the service
+systemctl daemon-reexec
+systemctl enable node_exporter
+systemctl start node_exporter

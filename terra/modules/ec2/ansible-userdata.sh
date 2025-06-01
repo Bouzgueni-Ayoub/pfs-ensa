@@ -1,9 +1,14 @@
 #!/bin/bash
 
+set -e
+
+
 # Update and install required dependencies
 apt update -y
 apt install -y unzip curl wget
 sudo apt install -y jq
+apt-get install -y wget tar
+
 
 # Install AWS CLI v2 without modifying the $PATH explicitly
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -102,15 +107,82 @@ fi
 cd /home/ubuntu/ansible
 ansible-playbook -i inventory.ini wireguard-install.yml -u ubuntu
 
-wget https://github.com/prometheus/prometheus/releases/latest/download/prometheus-<version>.linux-amd64.tar.gz
-tar xvf prometheus-*.tar.gz
-cd prometheus-*/
+
+
+
+#Installation of Promatieus
+
+# Create user and directory
+useradd --no-create-home --shell /bin/false prometheus
+mkdir -p /etc/prometheus /var/lib/prometheus
+
+# Download Prometheus
+cd /opt
+wget https://github.com/prometheus/prometheus/releases/latest/download/prometheus-2.52.0.linux-amd64.tar.gz
+tar xvf prometheus-2.52.0.linux-amd64.tar.gz
+cd prometheus-2.52.0.linux-amd64
+
+# Move binaries
+cp prometheus promtool /usr/local/bin/
+
+# Move config and consoles
+cp -r consoles/ console_libraries/ /etc/prometheus/
+
+# Write Prometheus config
+cat <<EOF > /etc/prometheus/prometheus.yml
+global:
+  scrape_interval: 15s
 
 scrape_configs:
   - job_name: 'wireguard-node'
     static_configs:
       - targets: ['10.0.1.100:9100']
+EOF
 
-sudo apt install -y grafana
+# Set permissions
+chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus
+
+# Create systemd service
+cat <<EOF > /etc/systemd/system/prometheus.service
+[Unit]
+Description=Prometheus Monitoring
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \\
+  --config.file=/etc/prometheus/prometheus.yml \\
+  --storage.tsdb.path=/var/lib/prometheus \\
+  --web.console.templates=/etc/prometheus/consoles \\
+  --web.console.libraries=/etc/prometheus/console_libraries
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Reload systemd and start service
+systemctl daemon-reexec
+systemctl enable prometheus
+systemctl start prometheus
+
+
+
+#Intallation of Grafana
+
+# Add Grafana APT repo
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+
+# Add repo key
+sudo apt-get install -y gnupg2
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+
+# Update and install
+sudo apt-get update
+sudo apt-get install grafana -
+sudo systemctl daemon-reexec
 sudo systemctl start grafana-server
 sudo systemctl enable grafana-server
