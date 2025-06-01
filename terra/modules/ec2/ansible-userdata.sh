@@ -101,3 +101,7 @@ if [ ! -f /home/ubuntu/ansible/main-key.pem ]; then
 fi
 cd /home/ubuntu/ansible
 ansible-playbook -i inventory.ini wireguard-install.yml -u ubuntu
+
+wget https://github.com/prometheus/prometheus/releases/latest/download/prometheus-<version>.linux-amd64.tar.gz
+tar xvf prometheus-*.tar.gz
+cd prometheus-*/
