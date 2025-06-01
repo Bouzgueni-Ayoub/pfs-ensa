@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 
 # Update and install required dependencies
 apt update -y
