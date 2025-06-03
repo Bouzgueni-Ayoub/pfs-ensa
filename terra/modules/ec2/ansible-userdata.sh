@@ -52,7 +52,6 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 # Check if AWS CLI is installed
 aws --version
 
-#!/bin/bash
 
 echo "🔍 Searching for S3 bucket tagged as 'Ansible files'..."
 
@@ -116,12 +115,14 @@ mkdir -p /etc/prometheus /var/lib/prometheus
 
 # Download Prometheus
 cd /opt
-wget https://github.com/prometheus/prometheus/releases/latest/download/prometheus-2.52.0.linux-amd64.tar.gz
-tar xvf prometheus-2.52.0.linux-amd64.tar.gz
-cd prometheus-2.52.0.linux-amd64
+sudo wget https://github.com/prometheus/prometheus/releases/download/v2.51.2/prometheus-2.51.2.linux-amd64.tar.gz
+sudo tar xvf prometheus-2.51.2.linux-amd64.tar.gz
+cd prometheus-2.51.2.linux-amd64
 
-# Move binaries
-cp prometheus promtool /usr/local/bin/
+
+sudo cp prometheus promtool /usr/local/bin/
+
+
 
 # Move config and consoles
 cp -r consoles/ console_libraries/ /etc/prometheus/
@@ -132,9 +133,13 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'wireguard-node'
+  - job_name: 'node'
     static_configs:
       - targets: ['10.0.1.100:9100']
+
+  - job_name: 'wireguard'
+    static_configs:
+      - targets: ['10.0.1.100:9586']
 EOF
 
 # Set permissions
@@ -146,6 +151,7 @@ cat <<EOF > /etc/systemd/system/prometheus.service
 Description=Prometheus Monitoring
 Wants=network-online.target
 After=network-online.target
+
 
 [Service]
 User=prometheus
@@ -170,17 +176,22 @@ systemctl start prometheus
 
 #Intallation of Grafana
 
-# Add Grafana APT repo
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+# Add dependencies
+sudo apt-get install -y software-properties-common gnupg2
 
-# Add repo key
-sudo apt-get install -y gnupg2
-wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+# Import Grafana GPG key the secure way
+wget -q -O - https://packages.grafana.com/gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/grafana-archive-keyring.gpg > /dev/null
+
+# Add Grafana repository with the signed-by flag
+echo "deb [signed-by=/usr/share/keyrings/grafana-archive-keyring.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list > /dev/null
+
+# Update and install Grafana
+sudo apt-get update
+sudo apt-get install -y grafana
 
 # Update and install
 sudo apt-get update
-sudo apt-get install grafana -
-sudo systemctl daemon-reexec
+sudo apt-get install -y grafana 
+sudo systemctl daemon-reload
 sudo systemctl start grafana-server
 sudo systemctl enable grafana-server

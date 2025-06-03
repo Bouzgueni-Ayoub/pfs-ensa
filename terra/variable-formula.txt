@@ -4,6 +4,6 @@ wireguard_clients = [
     name               = "alice"
     client_private_key = "aLUlWd63rsbjKrRzFyjJterBGxQ/rKYK3+J38znBO3c="
     client_public_key   = "YqMA/PeLPaYBuXybO0mEfOHU34oFtoUDDV0nlIAHamw="
-    client_ip          = "10.0.0.2"
+    client_ip          = "10.66.66.2"
   }
 ]

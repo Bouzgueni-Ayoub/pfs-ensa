@@ -17,7 +17,7 @@ data "aws_ami" "ubuntu" {
 # Launch the EC2 instance normally (no manual ENI)
 resource "aws_instance" "wireguard_server" {
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t2.micro"
+  instance_type               = "t3a.micro"
   key_name                    = "main-key"
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true

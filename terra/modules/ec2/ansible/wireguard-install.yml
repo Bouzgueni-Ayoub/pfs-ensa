@@ -84,7 +84,7 @@
         - iptables:
             table: nat
             chain: POSTROUTING
-            source: "10.0.0.0/24"
+            source: "10.66.66.0/24"
             out_interface: "{{ pub_if }}"
             jump: MASQUERADE
         - iptables:
@@ -127,3 +127,77 @@
 
     - name: Upload client configs to S3
       shell: aws s3 cp /home/ubuntu/ansible/clients/ s3://{{ ansible_bucket_name }}/clients/ --recursive
+
+    - name: Install dependencies for Rust and WireGuard exporter
+      apt:
+        name:
+          - curl
+          - build-essential
+          - pkg-config
+          - libssl-dev
+        update_cache: yes
+
+    - name: Install rustup (Rust installer)
+      shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
+      args:
+        creates: /root/.cargo/bin/rustc
+
+    - name: Ensure Rust environment is available in shell
+      shell: source $HOME/.cargo/env && rustc --version
+      environment:
+        HOME: "/root"
+
+    - name: Clone WireGuard exporter (Rust version)
+      git:
+        repo: https://github.com/MindFlavor/prometheus_wireguard_exporter.git
+        dest: /opt/prometheus_wireguard_exporter
+        version: master
+
+    - name: Build the exporter using cargo
+      shell: |
+        source $HOME/.cargo/env
+        cargo build --release
+      args:
+        chdir: /opt/prometheus_wireguard_exporter
+      environment:
+        HOME: "/root"
+
+    - name: Copy built binary to /usr/local/bin
+      copy:
+        src: /opt/prometheus_wireguard_exporter/target/release/prometheus_wireguard_exporter
+        dest: /usr/local/bin/wireguard-exporter
+        mode: '0755'
+
+    - name: Create systemd service for WireGuard exporter
+      copy:
+        dest: /etc/systemd/system/wireguard-exporter.service
+        content: |
+          [Unit]
+          Description=WireGuard Prometheus Exporter (Rust)
+          After=network.target
+
+          [Service]
+          ExecStart=/usr/local/bin/wireguard-exporter
+          Restart=always
+          User=root
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable and start WireGuard exporter service
+      systemd:
+        name: wireguard-exporter
+        enabled: yes
+        state: started
+
+        
+    - name: Fix iptables MASQUERADE rule for correct interface
+      block:
+        - name: Delete incorrect MASQUERADE rule on eth0
+          ansible.builtin.command: >
+            iptables -t nat -D POSTROUTING -s 10.66.66.0/24 -o eth0 -j MASQUERADE
+          ignore_errors: yes
+
+        - name: Add correct MASQUERADE rule on ens5
+          ansible.builtin.command: >
+            iptables -t nat -A POSTROUTING -s 10.66.66.0/24 -o ens5 -j MASQUERADE

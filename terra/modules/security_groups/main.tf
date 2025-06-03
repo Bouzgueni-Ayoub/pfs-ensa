@@ -41,7 +41,13 @@ resource "aws_security_group" "allow_wireguard_and_ssh" {
     protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"]  # Allow access from any IP for the WireGuard VPN (can be more restrictive if needed)
   }
-
+  
+ingress {
+    from_port   = 9586
+    to_port     = 9586
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   # Egress rule to allow all outbound traffic
   egress {
     from_port   = 0
