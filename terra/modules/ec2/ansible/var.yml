@@ -1,0 +1,7 @@
+"ansible_bucket_name": "wireguard-configs-1ccecbff"
+"server_endpoint": "3.123.160.224"
+"wireguard_clients":
+- "client_ip": "10.66.66.2"
+  "client_private_key": "aLUlWd63rsbjKrRzFyjJterBGxQ/rKYK3+J38znBO3c="
+  "client_public_key": "YqMA/PeLPaYBuXybO0mEfOHU34oFtoUDDV0nlIAHamw="
+  "name": "alice"

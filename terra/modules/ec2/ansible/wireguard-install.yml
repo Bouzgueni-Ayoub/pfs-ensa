@@ -24,7 +24,6 @@
         path: /etc/wireguard
         state: directory
         mode: '0700'
-
     # ─── 2) Always regenerate server key ─────────────────────────────
     - name: Remove any existing server private key
       file:
@@ -105,9 +104,9 @@
         enabled: yes
         state: started
 
-    - name: Delete wrong DHCP injected route for VPN client
-      command: ip route del 10.0.0.2
-      ignore_errors: yes
+   # - name: Delete wrong DHCP injected route for VPN client
+    #  command: ip route del 10.0.0.2
+     # ignore_errors: yes
 
     # ─── 7) Render individual client configs ─────────────────────────
     - name: Ensure client configs directory exists
@@ -143,9 +142,10 @@
         creates: /root/.cargo/bin/rustc
 
     - name: Ensure Rust environment is available in shell
-      shell: source $HOME/.cargo/env && rustc --version
+      shell: bash -c 'source $HOME/.cargo/env && rustc --version'
       environment:
         HOME: "/root"
+
 
     - name: Clone WireGuard exporter (Rust version)
       git:
@@ -154,19 +154,19 @@
         version: master
 
     - name: Build the exporter using cargo
-      shell: |
-        source $HOME/.cargo/env
-        cargo build --release
+      shell: /bin/bash -c 'source /root/.cargo/env && cargo build --release'
       args:
         chdir: /opt/prometheus_wireguard_exporter
       environment:
         HOME: "/root"
+
 
     - name: Copy built binary to /usr/local/bin
       copy:
         src: /opt/prometheus_wireguard_exporter/target/release/prometheus_wireguard_exporter
         dest: /usr/local/bin/wireguard-exporter
         mode: '0755'
+        remote_src: true
 
     - name: Create systemd service for WireGuard exporter
       copy:
@@ -189,15 +189,11 @@
         name: wireguard-exporter
         enabled: yes
         state: started
-
         
-    - name: Fix iptables MASQUERADE rule for correct interface
-      block:
-        - name: Delete incorrect MASQUERADE rule on eth0
-          ansible.builtin.command: >
-            iptables -t nat -D POSTROUTING -s 10.66.66.0/24 -o eth0 -j MASQUERADE
-          ignore_errors: yes
+    - name: Delete incorrect MASQUERADE rule on eth0
+      command: iptables -t nat -D POSTROUTING -s 10.66.66.0/24 -o eth0 -j MASQUERADE
+      ignore_errors: yes
 
-        - name: Add correct MASQUERADE rule on ens5
-          ansible.builtin.command: >
-            iptables -t nat -A POSTROUTING -s 10.66.66.0/24 -o ens5 -j MASQUERADE
+    - name: Add correct MASQUERADE rule on ens5
+      command: iptables -t nat -A POSTROUTING -s 10.66.66.0/24 -o ens5 -j MASQUERADE
+
