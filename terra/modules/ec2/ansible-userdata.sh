@@ -195,3 +195,14 @@ sudo apt-get install -y grafana
 sudo systemctl daemon-reload
 sudo systemctl start grafana-server
 sudo systemctl enable grafana-server
+
+
+# Wait for Grafana API to respond
+echo "Waiting for Grafana to start..."
+until curl -s -f -u admin:admin http://localhost:3000/api/health >/dev/null; do
+  echo "Grafana not ready yet. Sleeping..."
+  sleep 5
+done
+echo "Grafana is up."
+cd /home/ubuntu/ansible
+ansible-playbook gp.yml -u ubuntu
