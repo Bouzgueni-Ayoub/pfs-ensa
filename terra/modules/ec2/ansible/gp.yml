@@ -7,7 +7,7 @@
   vars:
     grafana_url: "http://localhost:3000"
     grafana_user: "admin"
-    grafana_password: "1234"
+    grafana_password: "admin"
     prometheus_url: "http://localhost:9090"
     dashboard_file: "Dashboard.json"
     datasource_name: "Prometheus"
