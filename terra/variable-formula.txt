@@ -1,7 +1,7 @@
 
 wireguard_clients = [
   {
-    name               = "alice"
+    name               = "ayoub"
     client_private_key = "aLUlWd63rsbjKrRzFyjJterBGxQ/rKYK3+J38znBO3c="
     client_public_key   = "YqMA/PeLPaYBuXybO0mEfOHU34oFtoUDDV0nlIAHamw="
     client_ip          = "10.66.66.2"
