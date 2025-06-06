@@ -46,6 +46,10 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -input=false
         working-directory: terra
+        
+      - name: Create var.yml before apply
+        run: |
+          echo "clients: loaded" > terra/modules/ec2/ansible/var.yml
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false
