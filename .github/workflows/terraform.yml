@@ -1,0 +1,51 @@
+name: Terraform Apply with Destroy (in terra directory)
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform Apply (Destroy First)
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-central-1
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.7.5
+
+      - name: Write CLIENTS secret to tfvars file in terra/
+        run: echo "${{ secrets.CLIENTS }}" > terra/clients.auto.tfvars
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+        working-directory: terra
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -input=false
+        working-directory: terra
+
+      - name: Terraform Plan
+        run: terraform plan -input=false
+        working-directory: terra
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false
+        working-directory: terra
