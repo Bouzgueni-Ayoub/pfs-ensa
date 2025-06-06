@@ -34,7 +34,7 @@ jobs:
       - name: Decode CLIENTS secret and write to tfvars file
         run: |
             echo "${{ secrets.CLIENTS }}" | base64 -d > terra/clients.auto.tfvars
-
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > terra/modules/ec2/ansible/main-key.pem
       - name: Terraform Init
         run: terraform init -reconfigure
         working-directory: terra
