@@ -5,6 +5,11 @@ terraform {
       version = "~> 5.0"
     }
   }
+  backend "s3" {
+    bucket = "ayoub-yahia-adil-pfs-state-bucket"   
+    key    = "terraform.tfstate"           
+    region = "eu-central-1"                
+  }
 }
 
 # Configure the AWS Provider
