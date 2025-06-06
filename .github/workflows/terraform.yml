@@ -31,8 +31,9 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Write CLIENTS secret to tfvars file in terra/
-        run: echo "${{ secrets.CLIENTS }}" > terra/clients.auto.tfvars
+      - name: Decode CLIENTS secret and write to tfvars file
+        run: |
+            echo "${{ secrets.CLIENTS }}" | base64 -d > terra/clients.auto.tfvars
 
       - name: Terraform Init
         run: terraform init -reconfigure
