@@ -8,7 +8,7 @@ resource "aws_eip" "eip_ansible" {
 # Ansible EC2 instance
 resource "aws_instance" "ansible_controller" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t2.micro"
+  instance_type          = "t3a.micro"
   key_name               = "main-key"
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true

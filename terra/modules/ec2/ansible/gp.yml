@@ -1,0 +1,52 @@
+---
+- name: Configure Grafana and import WireGuard dashboard
+  hosts: localhost
+  connection: local
+  become: false
+
+  vars:
+    grafana_url: "http://localhost:3000"
+    grafana_user: "admin"
+    grafana_password: "admin"
+    prometheus_url: "http://localhost:9090"
+    dashboard_file: "Dashboard.json"
+    datasource_name: "Prometheus"
+
+  tasks:
+    - name: Add Prometheus as Grafana data source
+      uri:
+        url: "{{ grafana_url }}/api/datasources"
+        method: POST
+        user: "{{ grafana_user }}"
+        password: "{{ grafana_password }}"
+        force_basic_auth: yes
+        headers:
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          name: "{{ datasource_name }}"
+          type: "prometheus"
+          access: "proxy"
+          url: "{{ prometheus_url }}"
+          isDefault: true
+      register: datasource_response
+      failed_when: datasource_response.status not in [200, 409]
+
+    - name: Load pre-fixed dashboard JSON from file
+      set_fact:
+        dashboard_json: "{{ lookup('file', dashboard_file) | from_json }}"
+
+    - name: Import finalized WireGuard dashboard into Grafana
+      uri:
+        url: "{{ grafana_url }}/api/dashboards/db"
+        method: POST
+        user: "{{ grafana_user }}"
+        password: "{{ grafana_password }}"
+        force_basic_auth: yes
+        headers:
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          dashboard: "{{ dashboard_json }}"
+          overwrite: true
+          folderId: 0

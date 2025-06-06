@@ -1,9 +1,14 @@
 #!/bin/bash
 
+set -e
+
+
 # Update and install required dependencies
 apt update -y
 apt install -y unzip curl wget
 sudo apt install -y jq
+apt-get install -y wget tar
+
 # Install AWS CLI v2
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
@@ -38,28 +43,43 @@ chmod 644 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 # Start CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
 
-#for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); do
-#  # Try to get tags for the bucket
-#  tags=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet" --output json 2>/dev/null)
-#
-#  # If tags exist and include our desired tag
-#  if echo "$tags" | jq -e '.[] | select(.Key=="Name" and .Value=="WireGuard Configs")' >/dev/null; then
-#    export BUCKET_NAME=$bucket
-#    echo "✅ Found bucket: $BUCKET_NAME"
-#    break
-#  fi
-#done
-#
-## Wait for folder and upload to S3
-#for i in {1..15}; do
-#  if [ -d "/home/ubuntu/ansible/clients/" ] && [ "$(ls -A "/home/ubuntu/ansible/clients/")" ]; then
-#    echo "✅ Found client config folder, uploading to S3..."
-#    bucket="$BUCKET_NAME"
-#    aws s3 cp "/home/ubuntu/ansible/clients/" "s3://$bucket/clients/" --recursive
-#
-#    break
-#  else
-#    echo "⏳ Folder not ready yet, retrying in 5 seconds..."
-#    sleep 5
-#  fi
-#done
+
+#Installing Node Exporter on WireGuard EC2
+# Setup Node Exporter
+mkdir -p /opt
+cd /opt
+
+wget https://github.com/prometheus/node_exporter/releases/download/v1.8.1/node_exporter-1.8.1.linux-amd64.tar.gz
+if [ ! -f node_exporter-1.8.1.linux-amd64.tar.gz ]; then
+  echo "❌ Download failed, exiting"
+  exit 1
+fi
+
+tar xvf node_exporter-1.8.1.linux-amd64.tar.gz
+cp node_exporter-1.8.1.linux-amd64/node_exporter /usr/local/bin/
+chmod +x /usr/local/bin/node_exporter
+
+# Create dedicated user
+useradd --no-create-home --shell /bin/false node_exporter || true
+
+# Create systemd unit
+cat <<EOF | tee /etc/systemd/system/node_exporter.service > /dev/null
+[Unit]
+Description=Prometheus Node Exporter
+After=network.target
+
+[Service]
+User=node_exporter
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Reload and start service
+systemctl daemon-reload
+systemctl enable node_exporter
+systemctl start node_exporter
+
+
+

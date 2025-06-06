@@ -5,6 +5,11 @@ terraform {
       version = "~> 5.0"
     }
   }
+  backend "s3" {
+    bucket = "ayoub-yahia-adil-pfs-state-bucket"   
+    key    = "terraform.tfstate"           
+    region = "eu-central-1"                
+  }
 }
 
 # Configure the AWS Provider
@@ -31,7 +36,7 @@ module "ec2" {
   ansible_profile   = module.iam.ansible_profile
   wireguard_clients = var.wireguard_clients
   wireguard_configs = module.s3.wireguard_configs
-}
+  }
 module "s3" {
   source = "./modules/s3"
   ansible_controller= module.ec2.ansible_controller
